@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack://src/components/auth/login.css"],"names":[],"mappings":"AAAA,EACI,QAAS,CACT,SAAU,CACV,qBACJ,CAEA,KACI,kBACJ","file":"main.239c234b.chunk.css","sourcesContent":["* {\r\n    margin: 0;\r\n    padding: 0;\r\n    box-sizing: border-box;\r\n}\r\n\r\nbody {\r\n    background: #f0f2f5;\r\n}"]}

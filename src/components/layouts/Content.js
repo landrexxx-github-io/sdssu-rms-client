@@ -202,7 +202,7 @@ const Content = () => {
             <React.Fragment>
                 <Switch>
                     <Route 
-                        // path="/login" 
+                        path="/login" 
                         component={Login}
                     ></Route>
 
