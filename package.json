@@ -2,7 +2,6 @@
 	"name": "client",
 	"version": "0.1.0",
 	"private": true,
-	"proxy": "http://localhost:5001",
 	"dependencies": {
 		"@ashvin27/react-datatable": "^1.5.3",
 		"@hookform/resolvers": "^2.6.0",
