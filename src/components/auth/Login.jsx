@@ -38,7 +38,7 @@ const Login = () => {
         e.preventDefault();
 
         const loginResponse = await axios.post(
-            "https://sdssu-rms.herokuapp.com/login",
+            "https://sdssu-rms.herokuapp.com/account/login",
             { username, password }
         );
 
