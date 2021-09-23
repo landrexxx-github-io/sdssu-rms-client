@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // const url = 'http://localhost:3001';
-const url = 'https://sdssu-rms.herokuapp.com/';
+const url = 'https://sdssu-rms.herokuapp.com';
 
 export const fetchProposal = () => axios.get(`${url}/proposal`);
 export const createProposal = (data) => axios.post(`${url}/proposal`, data);
