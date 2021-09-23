@@ -21,12 +21,12 @@ const App = () => {
 			}
 
 			// CHECKS if token is VALID
-			const isTokenValid = await axios.post("http://localhost:3001/account/is_token_valid", null, {
+			const isTokenValid = await axios.post("https://sdssu-rms.herokuapp.com/account/is_token_valid", null, {
 				headers: { "Authorization": token }
 			});
 
 			if(isTokenValid.data) {
-				const userResponse = await axios.get("http://localhost:3001/account/get_logged_in_user", {
+				const userResponse = await axios.get("https://sdssu-rms.herokuapp.com/account/get_logged_in_user", {
 					headers: { "Authorization": token }
 				});
 
