@@ -240,13 +240,23 @@ const Proposal = ({ currentUser }) => {
             align: "left",
             sortable: true,
             cell: (proposal) => {
-                return (
-                    <div>
-                        <span className="badge badge-primary">
-                            { proposal.remarks.toUpperCase() }
-                        </span>
-                    </div>
-                )
+                if(proposal.remarks === REMARKS.APPROVED) {
+                    return (
+                        <div>
+                            <span className="badge badge-success">
+                                { proposal.remarks.toUpperCase() }
+                            </span>
+                        </div>
+                    )
+                } else {
+                    return (
+                        <div>
+                            <span className="badge badge-secondary">
+                                { proposal.remarks.toUpperCase() }
+                            </span>
+                        </div>
+                    )
+                }
             }
         },
         {
