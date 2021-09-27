@@ -138,7 +138,8 @@ const Proposal = ({ currentUser }) => {
             width: proposal.remarks === REMARKS.PENDING ? 80 : null,
             cell: (proposal) => {
                 // Only the Research Head has the access of all the buttons
-                if (proposal.remarks === REMARKS.PENDING && currentUser.user_type === USER_TYPE.ADMIN) {
+                // if (proposal.remarks === REMARKS.PENDING && currentUser.user_type === USER_TYPE.USR) {
+                if (currentUser.user_type === USER_TYPE.ADMIN) {
                     return (
                         <React.Fragment>
                             <Button
@@ -231,6 +232,22 @@ const Proposal = ({ currentUser }) => {
             className: "font-14",
             align: "left",
             sortable: true,
+        },
+        {
+            key: "remarks",
+            text: "Status",
+            className: "font-14 badge badge-primary",
+            align: "left",
+            sortable: true,
+            // cell: (proposal) => {
+            //     return (
+            //         <div>
+            //             <span className="badge badge-primary">
+            //                 p
+            //             </span>
+            //         </div>
+            //     )
+            // }
         },
         {
             key: "action",
