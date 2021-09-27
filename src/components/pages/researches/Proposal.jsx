@@ -236,18 +236,18 @@ const Proposal = ({ currentUser }) => {
         {
             key: "remarks",
             text: "Status",
-            className: "font-14 badge badge-primary",
+            className: "font-14",
             align: "left",
             sortable: true,
-            // cell: (proposal) => {
-            //     return (
-            //         <div>
-            //             <span className="badge badge-primary">
-            //                 p
-            //             </span>
-            //         </div>
-            //     )
-            // }
+            cell: (proposal) => {
+                return (
+                    <div>
+                        <span className="badge badge-primary">
+                            { proposal.remarks.toUpperCase() }
+                        </span>
+                    </div>
+                )
+            }
         },
         {
             key: "action",
