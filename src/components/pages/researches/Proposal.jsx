@@ -138,7 +138,7 @@ const Proposal = ({ currentUser }) => {
             width: proposal.remarks === REMARKS.PENDING ? 80 : null,
             cell: (proposal) => {
                 // Only the Research Head has the access of all the buttons
-                if (proposal.remarks === REMARKS.PENDING && currentUser.user_type === USER_TYPE.USR) {
+                if (proposal.remarks === REMARKS.PENDING && currentUser.user_type === USER_TYPE.ADMIN) {
                     return (
                         <React.Fragment>
                             <Button
