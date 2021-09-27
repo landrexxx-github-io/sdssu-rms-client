@@ -362,15 +362,16 @@ const Proposal = ({ currentUser }) => {
                                 </Button>
                             </React.Fragment>
                         );
-                    } else if (proposal.remarks === REMARKS.APPROVED) {
-                        return (
-                            <React.Fragment>
-                                <div className="badge badge-success">
-                                    {proposal.remarks.toUpperCase()}
-                                </div>
-                            </React.Fragment>
-                        );
-                    }
+                    } 
+                    // else if (proposal.remarks === REMARKS.APPROVED) {
+                    //     return (
+                    //         <React.Fragment>
+                    //             <div className="badge badge-success">
+                    //                 {proposal.remarks.toUpperCase()}
+                    //             </div>
+                    //         </React.Fragment>
+                    //     );
+                    // }
                 }
             },
         },
