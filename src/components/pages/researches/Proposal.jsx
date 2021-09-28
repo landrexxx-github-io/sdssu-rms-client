@@ -1225,30 +1225,6 @@ const Proposal = ({ currentUser }) => {
                                     </Col>
                                 </Row>
                             </FormGroup>
-                            {/* <FormGroup>
-                                <Row>
-                                    <Col md="6">
-                                        <Label for="">
-                                            Date of Completion{" "}
-                                            <span className="text-danger">
-                                                *
-                                            </span>
-                                        </Label>
-                                        <div>
-                                            <DateTimePickerComponent
-                                                format="yyyy-MM-dd"
-                                                id="datetimepicker"
-                                                value={dateOfCompletion}
-                                                onChange={(e) => {
-                                                    setDateOfCompletion(
-                                                        e.target.value
-                                                    );
-                                                }}
-                                            />
-                                        </div>
-                                    </Col>
-                                </Row>
-                            </FormGroup> */}
                             <FormGroup>
                                 <Row>
                                     <Col md="6">

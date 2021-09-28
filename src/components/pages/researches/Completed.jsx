@@ -46,8 +46,13 @@ import ReactDatatable from "@ashvin27/react-datatable";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import Select from "react-select";
+import makeAnimated from "react-select/animated";
+
 import moment from "moment";
 // import { updateCompleted } from "../../../../../server/controllers/completed";
+
+const animatedComponents = makeAnimated();
 
 const MODAL_TYPE = {
     CRT: "CREATE",
@@ -69,6 +74,16 @@ const formSchema = yup.object().shape({
     date_started: yup.string().required("Date started field is required."),
     date_completed: yup.string().required("Date completed field is required."),
     duration: yup.string().required("Duration field is required."),
+    
+    // research_id_external: yup.string().required("Title of research field is required."),
+    // title_of_research_external: yup.string().required("Title of research field is required"),
+    // type_of_research_external: yup.string().required("Type of research field is required"),
+    // source_of_funding_external: yup.string().required("Source of funding field is required"),
+    // total_funds_external: yup.string().required("Total funds field is required."),
+    // abstract_external: yup.string().required("Abstract field is required."),
+    // date_started_external: yup.string().required("Date started field is required."),
+    // date_completed_external: yup.string().required("Date completed field is required."),
+    // duration_external: yup.string().required("Duration field is required."),
     // research_file: yup
     //         .mixed()
     //         .test("name", "Please provide a PDF file.", (value) => {
@@ -86,14 +101,15 @@ const Completed = ({ currentUser }) => {
 
     const dispatch = useDispatch(); // this is to dispatch actions
 
-    const { register, handleSubmit, formState: { errors }, reset } = useForm({
+    const { register, handleSubmit, formState: { errors }, reset, watch } = useForm({
         resolver: yupResolver(formSchema)
     });
 
     const [modal, setModal] = useState(false);
+    const [modalExternal, setModalExternal] = useState(false);
     const [modalPrompt, setModalPrompt] = useState(false);
     const [modalType, setModalType] = useState(null);
-    const [modalPdf, setModalPdf] = useState(false);
+    // const [modalPdf, setModalPdf] = useState(false);
     const [activeTab, setActiveTab] = useState("1");
 
     const [researchId, setResearchId] = useState(null);
@@ -107,11 +123,12 @@ const Completed = ({ currentUser }) => {
     const [dateStarted, setDateStarted] = useState("");
     const [dateCompleted, setDateCompleted] = useState("");
     const [duration, setDuration] = useState("");
-    const [file, setFile] = useState("");
-    const [fileName, setFileName] = useState("");
-    const [filePath, setfilePath] = useState("");
+    // const [file, setFile] = useState("");
+    // const [fileName, setFileName] = useState("");
+    // const [filePath, setfilePath] = useState("");
+    const [totalFunds, setTotalFunds] = useState("");
     const [remarks, setRemarks] = useState("pending");
-    // const [status, setStatus] = useState("completed");
+    const [status, setStatus] = useState("completed");
     const [isCompleted, setIsCompleted] = useState("N");
     const [updatedAt, setUpdatedAt] = useState(new Date());
     const [updatedBy, setUpdatedBy] = useState({
@@ -130,7 +147,7 @@ const Completed = ({ currentUser }) => {
             align: "left",
             sortable: true,
             cell: (completed) => {
-                if(completed.is_completed === 'N') {
+                if(completed.is_completed === 'N' && currentUser.user_type === USER_TYPE.RH) {
                     return (
                         <React.Fragment>
                             <Button
@@ -170,7 +187,7 @@ const Completed = ({ currentUser }) => {
             cell: (completed) => {
                 return (
                     <div>
-                        {moment(completed.date_started).format("LL")}
+                        { moment(completed.date_started).format("LL") }
                     </div>
                 )
             }
@@ -195,6 +212,24 @@ const Completed = ({ currentUser }) => {
             className: "font-14",
             align: "left",
             sortable: true,
+        },
+        {
+            key: "is_completed",
+            text: "Status",
+            className: "font-14",
+            align: "left",
+            sortable: true,
+            cell: (completed) => {
+                if(completed.is_completed === "Y") {
+                    return (
+                        <div className="badge badge-success">Completed</div>
+                    )
+                } else {
+                    return (
+                        <span className="badge badge-secondary">Pending</span>
+                    )
+                }
+            }
         },
         {
             key: "action",
@@ -294,14 +329,30 @@ const Completed = ({ currentUser }) => {
             children: [
                 <span>
                     <i
-                        className="fa fa-plus-circle"
+                        className="fa fa-file"
                         aria-hidden="true"
                     ></i>
-                    &nbsp; Create
+                    {/* &nbsp; Funded */}
                 </span>,
             ],
             onClick: () => {
                 setModal(!modal);
+            },
+        },
+        {
+            className: "btn btn-primary",
+            title: "Create New",
+            children: [
+                <span>
+                    <i
+                        className="fa fa-share"
+                        aria-hidden="true"
+                    ></i>
+                    {/* &nbsp; Funded */}
+                </span>,
+            ],
+            onClick: () => {
+                setModalExternal(!modalExternal);
             },
         },
     ];
@@ -321,8 +372,9 @@ const Completed = ({ currentUser }) => {
         setAuthor("");
         setSourceOfFunding("");
         setNameOfAgency("");
-        setDateOfCompletion("");
-        // setRemarks("");
+        setDateStarted("");
+        setDateCompleted("");
+        setDuration("");
     };
 
     const toggleModal = (modal_type) => {
@@ -340,18 +392,8 @@ const Completed = ({ currentUser }) => {
         }
     };
 
-    const toggleModalPdf = () => {
-        setModalPdf(!modalPdf);
-    };
-
     const toggleTab = (tabId) => {
         if (activeTab !== tabId) setActiveTab(tabId);
-    };
-
-    const showModalPdf = (file_name) => {
-        toggleModalPdf();
-        setFileName(file_name);
-        setfilePath("");
     };
 
     const onSubmit = (data) => {
@@ -388,6 +430,37 @@ const Completed = ({ currentUser }) => {
         }
 
         toggleModal(MODAL_TYPE.CRT);
+    }
+
+    const handleSubmitCompletedProposal = (e) => {
+        e.preventDefault();
+
+        const authors = [];
+        const dateFormat = moment(dateOfCompletion).format("L");
+        author.map((list) => authors.push(list.label));
+
+        const details = {
+            research_id: researchId,
+            title_of_research: titleOfResearch,
+            type_of_research: typeOfResearch,
+            author,
+            author_list: authors.join(", "),
+            source_of_funding: sourceOfFunding,
+            name_of_agency: nameOfAgency,
+            total_funds: totalFunds,
+            abstract: abstract,
+            date_started: dateStarted,
+            date_completed: dateCompleted,
+            duration: duration,
+            is_completed: isCompleted,
+            created_at: new Date(),
+            created_by: updatedBy
+        }
+
+        dispatch(createProposalCompleted(details));
+
+        setModalExternal(false);
+        clearForm();
     }
 
     // const onSubmitFormFunded = () => {
@@ -776,8 +849,8 @@ const Completed = ({ currentUser }) => {
                                     </NavLink>
                                 </NavItem>
                             </Nav> */}
-                            <TabContent activeTab={activeTab}>
-                                {/* <TabPane tabId="1"> */}
+                            {/* <TabContent activeTab={activeTab}>
+                                <TabPane tabId="1"> */}
                                     <FormGroup>
                                         <Label for="">
                                             Title of Research{" "}
@@ -786,15 +859,10 @@ const Completed = ({ currentUser }) => {
                                             </span>
                                         </Label>
                                         <select
-                                            className={errors.research_id ? "is-invalid form-control" : "form-control" }
+                                            className={errors.research_id && activeTab === 1 ? "is-invalid form-control" : "form-control" }
                                             type="select"
                                             name="research_id"
                                             id="research_id"
-                                            // value={researchId || ""}
-                                            // onChange={(e) => {
-                                            //     setResearchId(e.target.value);
-                                            // }}
-                                            // required
                                             defaultValue={researchId}
                                             {...register("research_id")}
                                         >
@@ -802,7 +870,7 @@ const Completed = ({ currentUser }) => {
                                             {getResearchesOptions()}
                                         </select>
                                         <span className="text-danger">
-                                            {errors.research_id?.message}
+                                            {errors.research_id?.message && activeTab === 1}
                                         </span>
                                     </FormGroup>
                                     <FormGroup>
@@ -885,227 +953,313 @@ const Completed = ({ currentUser }) => {
                                         </span>
                                     </FormGroup> */}
                                 {/* </TabPane> */}
-                                {/* <TabPane tabId="2">
-                                    <FormGroup>
-                                        <Input
-                                            type="hidden"
-                                            name="research_id"
-                                            id="research_id"
-                                            value={researchId || ""}
-                                            onChange={(e) => {
-                                                setResearchId(e.target.value);
-                                            }}
-                                        />
-                                        <Label for="">
-                                            Title of Research{" "}
-                                            <span className="text-danger">
-                                                *
-                                            </span>
-                                        </Label>
-                                        <Input
-                                            type="text"
-                                            name="title_of_research"
-                                            id="title_of_research"
-                                            value={titleOfResearch || ""}
-                                            onChange={(e) => {
-                                                setTitleOfResearch(
-                                                    e.target.value
-                                                );
-                                            }}
-                                            required
-                                        />
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Label for="">
-                                            Type of Research{" "}
-                                            <span className="text-danger">
-                                                *
-                                            </span>
-                                        </Label>
-                                        <Input
-                                            type="select"
-                                            name="type_of_research"
-                                            id="type_of_research"
-                                            value={typeOfResearch || ""}
-                                            onChange={(e) => {
-                                                setTypeOfResearch(
-                                                    e.target.value
-                                                );
-                                            }}
-                                            required
-                                        >
-                                            <option value="">Choose...</option>
-                                            <option value="descriptive">
-                                                Descriptive
-                                            </option>
-                                            <option value="developmental">
-                                                Developmental
-                                            </option>
-                                            <option value="experimental">
-                                                Experimental
-                                            </option>
-                                            <option value="modelling">
-                                                Modelling
-                                            </option>
-                                            <option value="others">
-                                                Others
-                                            </option>
-                                        </Input>
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Label for="">
-                                            Author(s){" "}
-                                            <span className="text-danger">
-                                                *
-                                            </span>
-                                        </Label>
-                                        <Select
-                                            closeMenuOnSelect={false}
-                                            components={animatedComponents}
-                                            isMulti
-                                            // options={getFacultiesOption(null, null)}
-                                            options={getAuthorsOption()}
-                                            name="author"
-                                            value={author}
-                                            onChange={setAuthor}
-                                            required
-                                        />
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Row>
-                                            <Col md="6">
-                                                <Label for="">
-                                                    Source of Funding{" "}
-                                                    <span className="text-danger">
-                                                        *
-                                                    </span>
-                                                </Label>
-                                                <Input
-                                                    type="select"
-                                                    name="source_of_funding"
-                                                    id="source_of_funding"
-                                                    value={
-                                                        sourceOfFunding || ""
-                                                    }
-                                                    onChange={(e) => {
-                                                        setSourceOfFunding(
-                                                            e.target.value
-                                                        );
-                                                    }}
-                                                    required
-                                                >
-                                                    <option value="">
-                                                        Choose...
-                                                    </option>
-                                                    <option value="stf">
-                                                        STF
-                                                    </option>
-                                                    <option value="gaa">
-                                                        GAA
-                                                    </option>
-                                                    <option value="external">
-                                                        External
-                                                    </option>
-                                                    <option value="personal">
-                                                        Personal
-                                                    </option>
-                                                </Input>
-                                            </Col>
-                                            <Col md="6">
-                                                <Label for="">
-                                                    {sourceOfFunding ===
-                                                    "external"
-                                                        ? "Name of Agency"
-                                                        : ""}
-                                                </Label>
-                                                <Input
-                                                    type={
-                                                        sourceOfFunding ===
-                                                        "external"
-                                                            ? "text"
-                                                            : "hidden"
-                                                    }
-                                                    name="name_of_agency"
-                                                    id="name_of_agency"
-                                                    value={nameOfAgency || ""}
-                                                    onChange={(e) => {
-                                                        setNameOfAgency(
-                                                            e.target.value
-                                                        );
-                                                    }}
-                                                />
-                                            </Col>
-                                        </Row>
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Row>
-                                            <Col md="6">
-                                                <Label for="">
-                                                    Date of Completion{" "}
-                                                    <span className="text-danger">
-                                                        *
-                                                    </span>
-                                                </Label>
-                                                <Input
-                                                    type="date"
-                                                    name="date_of_completion"
-                                                    id="date_of_completion"
-                                                    value={
-                                                        dateOfCompletion || ""
-                                                    }
-                                                    onChange={(e) => {
-                                                        setDateOfCompletion(
-                                                            e.target.value
-                                                        );
-                                                    }}
-                                                    required
-                                                />
-                                            </Col>
-                                        </Row>
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Label>Abstract</Label>
-                                        <Input
-                                            type="textarea"
-                                            name="abstract"
-                                            id="abstract"
-                                            value={abstract || ""}
-                                            onChange={(e) =>
-                                                setAbstract(e.target.value)
-                                            }
-                                            required
-                                        ></Input>
-                                    </FormGroup>
-                                    <FormGroup>
-                                        <Label>Upload file</Label>
-                                        <br />
-                                        <Input
-                                            name="file"
-                                            type="file"
-                                            id="file"
-                                            onChange={(e) =>
-                                                setFile(e.target.files[0].name)
-                                            }
-                                            required
-                                        />
-                                    </FormGroup>
-                                </TabPane> */}
-                            </TabContent>
+                                {/* <TabPane tabId="2"> */}
+                                    
+                                {/* </TabPane>
+                            </TabContent> */}
                         </Container>
                     </ModalBody>
                     <ModalFooter className="mt-3">
                         <Button
                             type="submit"
                             color="primary"
-                            // onClick={onSubmitFormFunded}
                         >
-                            {activeTab === "1"
-                                ? "Save Changes"
-                                : "Save External"}
+                            Save Changes
                         </Button>
                         <Button
                             color="light"
                             onClick={() => toggleModal(MODAL_TYPE.CRT)}
+                        >
+                            Cancel
+                        </Button>
+                    </ModalFooter>
+                </Form>
+            </Modal>
+
+            <Modal
+                isOpen={modalExternal}
+                toggle={() => setModalExternal(false)}
+                size="lg"
+                className="modal-dialog font-14"
+            >
+                <ModalHeader
+                    className="bg-primary text-light"
+                    toggle={() => setModalExternal(false)}
+                >
+                    Add External Completed
+                </ModalHeader>
+                <Form onSubmit={handleSubmitCompletedProposal}>
+                    <ModalBody>
+                        <Container>
+                            <FormGroup>
+                                <Input
+                                    type="hidden"
+                                    name="research_id"
+                                    id="research_id"
+                                    // defaultValue={researchId}
+                                    // {...register("research_id_external")}
+                                    value={researchId}
+                                    onChange={(e) => { setResearchId(e.target.value) }}
+                                />
+                                <Label for="">
+                                    Title of Research{" "}
+                                    <span className="text-danger">
+                                        *
+                                    </span>
+                                </Label>
+                                <Input
+                                    // className={
+                                    //     errors.title_of_research_external
+                                    //         ? "is-invalid form-control"
+                                    //         : "form-control"
+                                    // }
+                                    className="form-control"
+                                    type="text"
+                                    name="title_of_research"
+                                    id="title_of_research"
+                                    value={titleOfResearch}
+                                    onChange={(e) => { setTitleOfResearch(e.target.value) }}
+                                    // defaultValue={titleOfResearch}
+                                    // {...register("title_of_research_external")}
+                                />
+
+                                {/* <small className="text-danger">
+                                    {errors.title_of_research_external?.message}
+                                </small> */}
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="">
+                                    Type of Research{" "}
+                                    <span className="text-danger">
+                                        *
+                                    </span>
+                                </Label>
+                                <select
+                                    // className={
+                                    //     errors.type_of_research_external
+                                    //         ? "is-invalid form-control"
+                                    //         : "form-control"
+                                    // }
+                                    className="form-control"
+                                    type="select"
+                                    name="type_of_research"
+                                    id="type_of_research"
+                                    value={typeOfResearch}
+                                    onChange={(e) => { setTypeOfResearch(e.target.value) }}
+                                    // defaultValue={typeOfResearch}
+                                    // {...register("type_of_research_external")}
+                                >
+                                    <option value="">Choose...</option>
+                                    <option value="descriptive">
+                                        Descriptive
+                                    </option>
+                                    <option value="developmental">
+                                        Developmental
+                                    </option>
+                                    <option value="experimental">
+                                        Experimental
+                                    </option>
+                                    <option value="modelling">Modelling</option>
+                                    <option value="others">Others</option>
+                                </select>
+                                {/* <small className="text-danger">
+                                    {errors.type_of_research_external?.message}
+                                </small> */}
+                            </FormGroup>
+                            <FormGroup>
+                                <Label for="">
+                                    Author(s){" "}
+                                    <span className="text-danger">
+                                        *
+                                    </span>
+                                </Label>
+                                <Select
+                                    closeMenuOnSelect={false}
+                                    components={animatedComponents}
+                                    isMulti
+                                    options={getAuthorsOption()}
+                                    name="author"
+                                    value={author}
+                                    onChange={setAuthor}
+                                    required
+                                />
+                            </FormGroup>
+                            <FormGroup>
+                                <Row>
+                                    <Col md="6">
+                                        <Label for="">
+                                            Source of Funding{" "}
+                                            <span className="text-danger">
+                                                *
+                                            </span>
+                                        </Label>
+                                        <select
+                                            // className={
+                                            //     errors.source_of_funding_external
+                                            //         ? "is-invalid form-control"
+                                            //         : "form-control"
+                                            // }
+                                            className="form-control"
+                                            type="select"
+                                            name="source_of_funding"
+                                            id="source_of_funding"
+                                            // defaultValue={sourceOfFunding}
+                                            // {...register("source_of_funding_external")}
+                                            value={sourceOfFunding}
+                                            onChange={(e) => { setSourceOfFunding(e.target.value) }}
+                                        >
+                                            <option value="">Choose...</option>
+                                            <option value="stf">STF</option>
+                                            <option value="gaa">GAA</option>
+                                            <option value="external">
+                                                External
+                                            </option>
+                                            <option value="personal">
+                                                Personal
+                                            </option>
+                                        </select>
+                                        {/* <small className="text-danger">
+                                            {errors.source_of_funding_external?.message}
+                                        </small> */}
+                                    </Col>
+                                    <Col md="6">
+                                        <Label for="">
+                                            {sourceOfFunding ===
+                                            "external"
+                                                ? "Name of Agency"
+                                                : ""}
+                                        </Label>
+                                        <input
+                                            className="form-control"
+                                            type={
+                                                watch("source_of_funding") ===
+                                                "external"
+                                                    ? "text"
+                                                    : "hidden"
+                                            }
+                                            name="name_of_agency"
+                                            id="name_of_agency"
+                                            value={nameOfAgency}
+                                            onChange={(e) => { setNameOfAgency(e.target.value) }}
+                                            // {...register("name_of_agency")}
+                                        />
+                                    </Col>
+                                </Row>
+                            </FormGroup>
+                            <FormGroup>
+                                <Row>
+                                    <Col md="6">
+                                        <Label for="">
+                                            Total Funds{" "}
+                                            <span className="text-danger">
+                                                *
+                                            </span>
+                                        </Label>
+                                        <input
+                                            className={
+                                                errors.total_funds_external
+                                                    ? "is-invalid form-control"
+                                                    : "form-control"
+                                            }
+                                            name="total_funds"
+                                            id="total_funds"
+                                            value={totalFunds}
+                                            onChange={(e) => { setTotalFunds(e.target.value) }}
+                                            // defaultValue={totalFunds}
+                                            // {...register("total_funds_external")}
+                                        />
+                                        {/* <small className="text-danger">
+                                            {errors.total_funds_external?.message}
+                                        </small> */}
+                                    </Col>
+                                </Row>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>
+                                    Abstract{" "}
+                                    <span className="text-danger">
+                                        *
+                                    </span>
+                                </Label>
+                                <textarea
+                                    // className={errors.abstract_external ? "is-invalid form-control" : "form-control" }
+                                    className="form-control"
+                                    rows="6"
+                                    type="textarea"
+                                    name="abstract"
+                                    id="abstract"
+                                    value={abstract}
+                                    onChange={(e) => { setAbstract(e.target.value) }}
+                                    // defaultValue={abstract}
+                                    // {...register("abstract_external")}
+                                ></textarea>
+                                {/* <span className="text-danger">
+                                    {errors.abstract_external?.message}
+                                </span> */}
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Date Started</Label>
+                                <input
+                                    // className={errors.date_started_external ? "is-invalid form-control" : "form-control" }
+                                    className="form-control"
+                                    id="date_started" 
+                                    name="date_started" 
+                                    type="date"
+                                    value={dateStarted}
+                                    onChange={(e) => { setDateStarted(e.target.value) }}
+                                    // defaultValue={dateStarted}
+                                    // {...register("date_started_external")} 
+                                />
+                                <span className="text-danger">
+                                    {errors.date_started_external?.message}
+                                </span>
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Date Completed</Label>
+                                <input 
+                                    // className={errors.date_completed_external ? "is-invalid form-control" : "form-control" }
+                                    className="form-control"
+                                    id="date_completed"
+                                    name="date_completed"
+                                    type="date" 
+                                    value={dateCompleted}
+                                    onChange={(e) => setDateCompleted(e.target.value) }
+                                    // defaultValue={dateCompleted}
+                                    // {...register("date_completed_external")}
+                                />
+                                {/* <span className="text-danger">
+                                    {errors.date_completed_external?.message}
+                                </span> */}
+                            </FormGroup>
+                            <FormGroup>
+                                <Label>Duration</Label>
+                                <input
+                                    // className={errors.duration_external ? "is-invalid form-control" : "form-control" } 
+                                    className="form-control"
+                                    id="duration" 
+                                    name="duration" 
+                                    type="text"
+                                    value={duration}
+                                    onChange={(e) => setDuration(e.target.value)}
+                                    // defaultValue={duration}
+                                    // {...register("duration_external")}
+                                />
+                                {/* <span className="text-danger">
+                                    {errors.duration_external?.message}
+                                </span> */}
+                            </FormGroup>
+                        </Container>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button
+                            type="submit"
+                            color="primary"
+                        >
+                            Save External
+                        </Button>
+                        <Button
+                            color="light"
+                            onClick={() => setModalExternal(false)}
                         >
                             Cancel
                         </Button>
