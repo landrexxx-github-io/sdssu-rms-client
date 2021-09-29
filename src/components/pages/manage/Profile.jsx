@@ -79,6 +79,10 @@ const Profile = ({ currentUser }) => {
             educational_attainment: data.educational_attainment,
         };
 
+        console.log("PROFILE data: ", profileData);
+
+        return false;
+
         dispatch(updateAccount(profileData));
     };
 

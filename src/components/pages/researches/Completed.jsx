@@ -253,36 +253,6 @@ const Completed = ({ currentUser }) => {
                                         }
                                     >Completed
                                     </Link>
-                                {/* <Link
-                                    to="#"
-                                    className="text-secondary dropdown-toggle"
-                                    type="button"
-                                    id="dropDownApprovedDisapproved"
-                                    data-toggle="dropdown"
-                                    aria-haspopup="true"
-                                    aria-expanded="false"
-                                >
-                                    <MdMoreVert size={30} />
-                                </Link>
-                                <div
-                                    className="dropdown-menu"
-                                    aria-labelledby="dropdownMenuButton"
-                                >
-                                    
-                                    <Link
-                                        className="dropdown-item text-danger"
-                                        to="#"
-                                        onClick={() => {
-                                            showModalPrompt(
-                                                completed,
-                                                MODAL_TYPE.DEL
-                                            );
-                                        }}
-                                    >
-                                        <MdDelete />
-                                        &nbsp;&nbsp;Remove
-                                    </Link>
-                                </div> */}
                             </React.Fragment>
                         );
                     } else {

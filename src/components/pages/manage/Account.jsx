@@ -105,6 +105,11 @@ const Account = () => {
             className: "",
             align: "left",
             sortable: true,
+            cell: (account) => {
+                return (
+                    <div>{ account.position.toUpperCase() }</div>
+                )
+            }
         },
         {
             key: "college",

@@ -62,8 +62,6 @@ const formSchema = yup.object().shape({
 })
 
 const Seminar = ({ currentUser }) => {
-    // const completed = useSelector((state) => state.completed.completed);
-    // const utilization = useSelector((state) => state.utilization.utilizations);
     const seminar = useSelector((state) => state.seminar.seminars);
 
     const dispatch = useDispatch(); // this is to dispatch actions
@@ -92,7 +90,7 @@ const Seminar = ({ currentUser }) => {
     // Datatables Configuration
     const dtColumns = [
         {
-            key: "proposal_no",
+            key: "seminar_id",
             align: "left",
             sortable: true,
             width: 130,
@@ -146,6 +144,11 @@ const Seminar = ({ currentUser }) => {
             className: "",
             align: "left",
             sortable: true,
+            cell: (seminar) => {
+                return (
+                    <div>{ seminar.type_of_participant.toUpperCase() }</div>
+                )
+            }
         },
         {
             key: "venue_of_the_activity",
@@ -160,39 +163,26 @@ const Seminar = ({ currentUser }) => {
             className: "",
             align: "left",
             sortable: true,
+            cell: (seminar) => {
+                return (
+                    <div>{ seminar.scope_of_the_activity.toUpperCase() }</div>
+                )
+            }
         },
-        // {
-        //     key: "",
-        //     text: "",
-        //     align: "left",
-        //     sortable: true,
-        //     cell: (utilization) => {
-        //         if(currentUser.user_type === USER_TYPE.RH || currentUser.user_type === USER_TYPE.ADMIN) {
-        //             if(utilization.is_completed === 'N' && currentUser.user_type === USER_TYPE.RH) {
-        //                 return (
-        //                     <React.Fragment>
-        //                         <Button
-        //                             size="sm"
-        //                             className="btn btn-sm"
-        //                             onClick={() => {
-        //                                 onSubmitUpdateRemarks(utilization._id);
-        //                             }}
-        //                         >
-        //                             Completed
-        //                         </Button>
-        //                         &nbsp;
-        //                     </React.Fragment>
-        //                 );
-        //             } else {
-        //                 return (
-        //                     <React.Fragment>
-        //                         <div className="badge badge-success">COMPLETED</div>
-        //                     </React.Fragment>
-        //                 );
-        //             }
-        //         }
-        //     },
-        // },
+        {
+            key: "",
+            text: "Name",
+            className: "",
+            align: "left",
+            sortable: true,
+            cell: (seminar) => {
+                const { full_name } = seminar.created_by;
+
+                return (
+                    <div>{ full_name }</div>
+                )
+            }
+        },
     ];
 
     const dtConfig = {
@@ -206,21 +196,6 @@ const Seminar = ({ currentUser }) => {
     };
 
     const dtExtraButtons = [
-        // {
-        //     className: "btn btn-primary",
-        //     title: "Print",
-        //     children: [
-        //         <span>
-        //             <i
-        //                 className="glyphicon glyphicon-print fa fa-print"
-        //                 aria-hidden="true"
-        //             ></i>
-        //         </span>,
-        //     ],
-        //     onClick: () => {
-        //         alert("Print Logic here");
-        //     },
-        // },
         {
             className: "btn btn-primary",
             title: "Create New",
@@ -244,11 +219,6 @@ const Seminar = ({ currentUser }) => {
     }, [dispatch]);
 
     const clearForm = () => {
-        // setUtilizationId(null);
-        // setResearchId(null);
-        // setTitleOfResearch("");
-        // setBeneficiary("");
-        // setDateOfUtilization("");
         setDateOfSeminar("");
         setTitleOfActivity("");
         setTypeOfParticipant("");
@@ -257,14 +227,8 @@ const Seminar = ({ currentUser }) => {
     };
 
     const toggleModal = () => {
+        reset({})  
         setModal(!modal);
-        clearForm();
-    };
-
-    const toggleTab = (tabId) => {
-        if (activeTab !== tabId) setActiveTab(tabId);
-
-        clearForm();
     };
 
     const showEditForm = (data) => {
@@ -277,14 +241,15 @@ const Seminar = ({ currentUser }) => {
             scope_of_the_activity,
         } = data;
 
-        toggleModal();
-
+        
         setSeminarId(_id);
-        setDateOfSeminar(date_of_seminar);
+        setDateOfSeminar(date_of_seminar)
         setTitleOfActivity(title_of_activity);
         setTypeOfParticipant(type_of_participant);
         setVenueOfActivity(venue_of_the_activity);
         setScopeOfActivity(scope_of_the_activity);
+        
+        toggleModal();
     };
 
     const onSubmit = (data) => {
@@ -308,31 +273,8 @@ const Seminar = ({ currentUser }) => {
         toggleModal();
     }
 
-    // const onSubmitForm = (e) => {
-    //     e.preventDefault();
-
-    //     const data = {
-    //         utilization_id: utilizationId,
-    //         research_id: researchId,
-    //         title_of_research: titleOfResearch,
-    //         beneficiary,
-    //         date_of_utilization: dateOfUtilization,
-    //         created_by: updatedBy,
-    //     };
-
-    //     if (!utilizationId) {
-    //         dispatch(createUtilizaition(data));
-    //     } else {
-    //         dispatch(updateUtilization(data));
-    //     }
-
-    //     toggleModal();
-    // };
-
     const onClickDelete = (seminar_id) => {
-        const isDelete = window.confirm(
-            "Are you sure you want to delete this data?"
-        );
+        const isDelete = window.confirm("Are you sure you want to delete this data?");
 
         if (isDelete) dispatch(deleteSeminar(seminar_id));
     };
@@ -357,8 +299,9 @@ const Seminar = ({ currentUser }) => {
                             _id: seminar[i]._id,
                             date_of_seminar: seminar[i].date_of_seminar,
                             title_of_activity: seminar[i].title_of_activity,
+                            type_of_participant: seminar[i].type_of_participant,
                             venue_of_the_activity: seminar[i].venue_of_the_activity,
-                            scope_of_the_activity: seminar[i].scope_of_the_activity
+                            scope_of_the_activity: seminar[i].scope_of_the_activity,
                         });
                     }
                 }
@@ -367,20 +310,6 @@ const Seminar = ({ currentUser }) => {
             }
         }
     };
-
-    // const onSubmitUpdateRemarks = (utilization_id) => {
-    //     const data = {
-    //         utilization_id,
-    //         is_completed: "Y",
-    //         updated_at: new Date(),
-    //     };
-
-    //     const isSubmit = window.confirm("Are you sure you want to update?");
-
-    //     if (isSubmit) {
-    //         dispatch(updateUtilization(data));
-    //     }
-    // };
 
     return (
         <React.Fragment>
@@ -404,9 +333,9 @@ const Seminar = ({ currentUser }) => {
             >
                 <ModalHeader
                     className="bg-primary text-light"
-                    toggle={toggleModal}
+                    toggle={() => toggleModal() }
                 >
-                    Add Seminar
+                    {!seminarId ? "Add Seminar" : "Update Seminar"}
                 </ModalHeader>
                 <Form onSubmit={handleSubmit(onSubmit)}>
                     <ModalBody>
@@ -514,8 +443,9 @@ const Seminar = ({ currentUser }) => {
                                             {...register("scope_of_the_activity")}
                                         >
                                             <option value="">Choose...</option>
-                                            <option value="national">National</option>
+                                            <option value="international">International</option>
                                             <option value="local">Local</option>
+                                            <option value="national">National</option>
                                             <option value="regional">Regional</option>
                                         </select>
                                         <span className="text-danger">
@@ -530,7 +460,7 @@ const Seminar = ({ currentUser }) => {
                         <Button type="submit" color="primary">
                             Save Changes
                         </Button>
-                        <Button color="light" onClick={toggleModal}>
+                        <Button color="light" onClick={() => toggleModal()}>
                             Cancel
                         </Button>
                     </ModalFooter>
@@ -574,14 +504,16 @@ const Seminar = ({ currentUser }) => {
             <Container fluid>
                 <Card>
                     <CardBody>
-                        <ReactDatatable
-                            className="table font-14"
-                            tHeadClassName="thead-dark"
-                            config={dtConfig}
-                            records={getSeminarByUser()}
-                            columns={dtColumns}
-                            extraButtons={dtExtraButtons}
-                        />
+                        <div className="table table-responsive">
+                            <ReactDatatable
+                                className="table font-14"
+                                tHeadClassName="thead-dark"
+                                config={dtConfig}
+                                records={getSeminarByUser()}
+                                columns={dtColumns}
+                                extraButtons={dtExtraButtons}
+                            />
+                        </div>
                     </CardBody>
                 </Card>
             </Container>

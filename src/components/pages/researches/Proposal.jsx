@@ -385,20 +385,6 @@ const Proposal = ({ currentUser }) => {
                 }
             },
         },
-        // {
-        //     key: "remarks",
-        //     text: "",
-        //     className: "",
-        //     align: "left",
-        //     cell: (proposal) => {
-        //         if(currentUser.user_type !== "rh" || currentUser.user_type !== "admin") {
-        //             return (
-        //                 <div className="badge badge-primary">{ proposal.remarks.toUpperCase() }</div>
-        //             )
-        //         }
-        //     }
-        // }
-        
     ];
 
     const dtConfig = {
@@ -463,18 +449,6 @@ const Proposal = ({ currentUser }) => {
         if (activeTab !== tabId) setActiveTab(tabId);
     };
 
-    const printPDF = () => {
-        const pdf = new jsPDF();
-
-        pdf.text("Sample pdf printing", 10, 10);
-
-        pdf.autoTable({ 
-            html: "#tbl-proposal" 
-        })
-
-        pdf.save("sample.pdf");
-    };
-
     const showEditForm = (data) => {
         const {
             _id,
@@ -517,7 +491,6 @@ const Proposal = ({ currentUser }) => {
             source_of_funding: data.source_of_funding,
             name_of_agency: data.name_of_agency,
             total_funds: data.total_funds,
-            // date_of_completion: dateFormat,
             remarks: remarks,
             status: status,
             created_by: createdBy,
