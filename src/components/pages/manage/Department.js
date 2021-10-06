@@ -158,7 +158,7 @@ const Department = () => {
     };
 
     const showEditForm = (data) => {
-        const { _id, department_code, department_name, campus_id } = data;
+        const { _id, department_code, department_name, campus_id, campus_name } = data;
 
         toggleModal();
 
@@ -166,6 +166,7 @@ const Department = () => {
         setDeptCode(department_code);
         setDeptName(department_name);
         setCampusId(campus_id);
+        setCampusName(campus_name);
     };
 
     const onSubmitForm = (e) => {
